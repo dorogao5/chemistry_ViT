@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Chemistry OCR → Word</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <img src="/static/image.png" alt="Logo" class="logo" />
+    <header>
+      <h1>Chemistry OCR → Word</h1>
+      <p>Укажите Mistral API ключ и загрузите изображения с химическими формулами.</p>
+    </header>
+
+    <section id="api-key-section" class="card">
+      <h2>1. API ключ</h2>
+      {% if api_key_set %}
+        <p class="status success">API ключ уже сохранен. Вы можете начать обработку изображений.</p>
+        <button id="clear-key" class="secondary">Удалить ключ</button>
+      {% else %}
+        <p>Введите Mistral API ключ. Он сохранится только в памяти этого приложения.</p>
+        <form id="api-key-form">
+          <label for="api-key-input">Mistral API ключ</label>
+          <input type="password" id="api-key-input" placeholder="sk-..." required />
+          <button type="submit">Сохранить ключ</button>
+        </form>
+      {% endif %}
+    </section>
+
+    <section id="upload-section" class="card">
+      <h2>2. Изображения</h2>
+      <p>Вставьте изображение через <kbd>Ctrl</kbd>+<kbd>V</kbd> или выберите файлы вручную. Можно обработать несколько файлов сразу.</p>
+      <form id="upload-form">
+        <div class="row">
+          <label for="mode">Режим обработки</label>
+          <select id="mode" name="mode" aria-label="Режим обработки">
+            {% for m in modes %}
+            <option value="{{ m }}" {% if m == "ViT" %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="row" id="vit-model-row">
+          <label for="vit_model">ViT качество</label>
+          <select id="vit_model" name="vit_model" aria-label="ViT качество">
+            {% for m in vit_models %}
+            <option value="{{ m.key }}" {% if m.key == "pixtral-large-latest" %}selected{% endif %}>{{ m.label }}</option>
+            {% endfor %}
+          </select>
+          <p class="hint">small: pixtral-12b + mistral-small, high: pixtral-large + mistral-small.</p>
+        </div>
+        <div class="drop-area" id="drop-area">
+          <p>Перетащите файлы сюда или нажмите, чтобы выбрать</p>
+          <input type="file" id="file-input" name="files" accept="image/*" multiple />
+        </div>
+        <button type="submit">Обработать</button>
+      </form>
+      <p class="hint">Поддерживается вставка изображений из буфера обмена. Просто нажмите в любом месте страницы и используйте Ctrl+V / Cmd+V.</p>
+    </section>
+
+    <section id="results" class="card hidden">
+      <h2>Результаты</h2>
+      <ul id="results-list"></ul>
+    </section>
+  </div>
+
+  <template id="result-item-template">
+    <li>
+      <span class="file-name"></span>
+      <a class="download-link">Скачать DOCX</a>
+    </li>
+  </template>
+
+  <script src="/static/app.js" data-api-key-set="{{ api_key_set | tojson | safe }}"></script>
+</body>
+</html>
+
